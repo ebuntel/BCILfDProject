@@ -96,9 +96,9 @@ eval_py_env = suite_gym.load(env_name,
 train_env = tf_py_environment.TFPyEnvironment(train_py_env)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 
-def callback(obs_t, obs_tp1, action, rew):
+def callback(obs_t, obs_tp1, action, rew, done, info):
     return [rew, obs_t, action]
 
-plotter = play.PlayPlot(callback, 30 * 5, ["reward"])
+plotter = play.PlayPlot(callback, 30 * 5, ["action"])
 
 play.play(env, keys_to_action = adict, zoom = 4, fps = 15, callback = plotter.callback)
