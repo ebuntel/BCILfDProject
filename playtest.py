@@ -1,12 +1,7 @@
-import base64
-import imageio
-import IPython
-import matplotlib
+
 import matplotlib.pyplot as plt
 import numpy as np
-import PIL.Image
 import pyvirtualdisplay
-import reverb
 import gym
 
 from gym import wrappers
@@ -96,9 +91,10 @@ eval_py_env = suite_gym.load(env_name,
 train_env = tf_py_environment.TFPyEnvironment(train_py_env)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 
+step_record = []
+
 def callback(obs_t, obs_tp1, action, rew):
+    step_record.append((obs_t, action, rew))
     return [rew, obs_t, action]
 
-plotter = play.PlayPlot(callback, 30 * 5, ["reward"])
-
-play.play(env, keys_to_action = adict, zoom = 4, fps = 15, callback = plotter.callback)
+play.play(env, keys_to_action = adict, zoom = 4, fps = 15, callback = callback)
