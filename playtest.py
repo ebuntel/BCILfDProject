@@ -1,4 +1,5 @@
 
+from itertools import count
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvirtualdisplay
@@ -6,6 +7,7 @@ import gym
 import pickle
 
 from gym import wrappers
+from datetime import datetime
 
 import ale_py.roms as roms
 
@@ -34,7 +36,28 @@ log_interval = 200  # @param {type:"integer"}
 num_eval_episodes = 10  # @param {type:"integer"}
 eval_interval = 1000  # @param {type:"integer"}
 
+step_record = []
+
 env_name = 'ALE/MsPacman-v5'
+
+def save_to_disk(steps):
+    try:
+        now = datetime.now()
+        date_time = now.strftime("%m-%d-%Y,%H-%M")
+        name_string = "trajectory" + date_time + ".pkl"
+        print(name_string)
+        with open(name_string,'wb') as outputloc:
+            pickle.dump(steps, outputloc, pickle.HIGHEST_PROTOCOL)
+        step_record = []
+    except:
+        print("Error writing trajectory to disk.")
+
+def callback(obs_t, obs_tp1, action, rew, done, info):
+    step_record.append((obs_t, obs_tp1, action, rew, done, info))
+    if(done):
+        save_to_disk(step_record)
+    else:
+        return [rew, obs_t, action]
 
 #Atari preprocessing and Frame stacking wrappers
 # gym_env_wrappers = [partial(
@@ -72,16 +95,7 @@ eval_py_env = suite_gym.load(env_name,
 train_env = tf_py_environment.TFPyEnvironment(train_py_env)
 eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 
-step_record = []
-
-def callback(obs_t, obs_tp1, action, rew, done, info):
-    step_record.append((obs_t, obs_tp1, action, rew, done, info))
-    return [rew, obs_t, action]
-
 play.play(env, keys_to_action = adict, zoom = 4, fps = 15, callback = callback)
 
 print(len(step_record))
 print(step_record[0])
-
-with open("trajectory.pkl", 'wb') as outputloc:
-    pickle.dump(step_record, outputloc, pickle.HIGHEST_PROTOCOL)
