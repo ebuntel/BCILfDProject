@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvirtualdisplay
 import gym
+import pickle
 
 from gym import wrappers
 
@@ -11,28 +12,8 @@ import ale_py.roms as roms
 import tensorflow as tf
 from functools import partial
 
-from tf_agents.agents.dqn import dqn_agent
-from tf_agents.drivers import py_driver
 from tf_agents.environments import suite_gym
 from tf_agents.environments import tf_py_environment
-
-from tf_agents.environments import atari_wrappers
-from tf_agents.environments import py_environment
-from tf_agents.environments import suite_atari
-
-from tf_agents.eval import metric_utils
-from tf_agents.metrics import tf_metrics
-from tf_agents.networks import sequential
-from tf_agents.networks import q_network
-from tf_agents.policies import py_tf_eager_policy
-from tf_agents.policies import random_tf_policy
-from tf_agents.policies import epsilon_greedy_policy
-from tf_agents.replay_buffers import reverb_replay_buffer
-from tf_agents.replay_buffers import reverb_utils
-from tf_agents.trajectories import trajectory
-from tf_agents.specs import tensor_spec
-from tf_agents.utils import common
-from tf_agents.train.utils import train_utils
 
 from tf_agents.environments.atari_preprocessing import AtariPreprocessing
 from tf_agents.environments.atari_wrappers import FrameStack4
@@ -93,8 +74,14 @@ eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
 
 step_record = []
 
-def callback(obs_t, obs_tp1, action, rew):
-    step_record.append((obs_t, action, rew))
+def callback(obs_t, obs_tp1, action, rew, done, info):
+    step_record.append((obs_t, obs_tp1, action, rew, done, info))
     return [rew, obs_t, action]
 
 play.play(env, keys_to_action = adict, zoom = 4, fps = 15, callback = callback)
+
+print(len(step_record))
+print(step_record[0])
+
+with open("trajectory.pkl", 'wb') as outputloc:
+    pickle.dump(step_record, outputloc, pickle.HIGHEST_PROTOCOL)
