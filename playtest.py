@@ -14,11 +14,13 @@ import ale_py.roms as roms
 import tensorflow as tf
 from functools import partial
 
-from tf_agents.environments import suite_gym
-from tf_agents.environments import tf_py_environment
+import tf_agents as tf_a
 
-from tf_agents.environments.atari_preprocessing import AtariPreprocessing
-from tf_agents.environments.atari_wrappers import FrameStack4
+# from tf_agents.environments import suite_gym
+# from tf_agents.environments import tf_py_environment
+
+# from tf_agents.environments.atari_preprocessing import AtariPreprocessing
+# from tf_agents.environments.atari_wrappers import FrameStack4
 
 # Set up a virtual display for rendering OpenAI gym environments.
 display = pyvirtualdisplay.Display(visible=1, size=(1400, 900)).start()
@@ -46,18 +48,20 @@ def save_to_disk(steps):
         date_time = now.strftime("%m-%d-%Y,%H-%M")
         name_string = "trajectory" + date_time + ".pkl"
         print(name_string)
-        with open(name_string,'wb') as outputloc:
-            pickle.dump(steps, outputloc, pickle.HIGHEST_PROTOCOL)
+
+        traj_list = []
+
+        for i in range(len(step_record)):
+            if(i == len(step_record) - 1):
+                traj_list.append(tf_a.trajectories.from_transition(step_record[i][0], step_record[i][1], None))
+            else:
+                traj_list.append(tf_a.trajectories.from_transition(step_record[i][0], step_record[i][1], step_record[i][2]))
         step_record = []
+        
+        with open(name_string,'wb') as outputloc:
+            pickle.dump(traj_list, outputloc, pickle.HIGHEST_PROTOCOL)
     except:
         print("Error writing trajectory to disk.")
-
-def callback(obs_t, obs_tp1, action, rew, done, info):
-    step_record.append((obs_t, obs_tp1, action, rew, done, info))
-    if(done):
-        save_to_disk(step_record)
-    else:
-        return [rew, obs_t, action]
 
 #Atari preprocessing and Frame stacking wrappers
 # gym_env_wrappers = [partial(
@@ -87,13 +91,35 @@ env.reset()
 adict = env.unwrapped.get_keys_to_action()
 print(adict)
 
-train_py_env = suite_gym.load(env_name, 
-                     gym_env_wrappers=[AtariPreprocessing, FrameStack4])
-eval_py_env = suite_gym.load(env_name, 
-                     gym_env_wrappers=[AtariPreprocessing, FrameStack4])
+def callback(obs_t, obs_tp1, action, rew, done, info):
 
-train_env = tf_py_environment.TFPyEnvironment(train_py_env)
-eval_env = tf_py_environment.TFPyEnvironment(eval_py_env)
+    if(info['episode_frame_number'] == 1):
+        step_type = tf_a.trajectories.StepType.FIRST
+    elif(done):
+        step_type = tf_a.trajectories.StepType.LAST
+    else:
+        step_type = tf_a.trajectories.StepType.MID
+
+    tf_timestep = tf_a.trajectories.TimeStep(np.array(step_type), rew, 1.0, obs_t)
+    tf_polstep = tf_a.trajectories.PolicyStep(action = action)
+
+    step_record.append((tf_timestep, tf_polstep, None))
+
+    if(info['episode_frame_number'] != 1):
+        step_record[-1][2] = step_type
+
+    if(done):
+        save_to_disk(step_record)
+    else:
+        return [rew, obs_t, action]
+
+train_py_env = tf_a.suite_gym.load(env_name, 
+                     gym_env_wrappers=[tf_a.AtariPreprocessing, tf_a.FrameStack4])
+eval_py_env = tf_a.suite_gym.load(env_name, 
+                     gym_env_wrappers=[tf_a.AtariPreprocessing, tf_a.FrameStack4])
+
+train_env = tf_a.tf_py_environment.TFPyEnvironment(train_py_env)
+eval_env = tf_a.tf_py_environment.TFPyEnvironment(eval_py_env)
 
 play.play(env, keys_to_action = adict, zoom = 4, fps = 15, callback = callback)
 
