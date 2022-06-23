@@ -92,6 +92,11 @@ print(adict)
 
 def callback(obs_t, obs_tp1, action, rew, done, info):
 
+    tf_rew = tf.Tensor(np.array(rew, dtype=np.float32), dtype=np.float32)
+    tf_rew.name = "Reward"
+
+    tf_
+
     if(info['episode_frame_number'] == 1):
         step_type = tf_a.trajectories.StepType.FIRST
     elif(done):
@@ -124,3 +129,5 @@ play.play(env, keys_to_action = adict, zoom = 4, fps = 15, callback = callback)
 
 print(len(step_record))
 print(step_record[0])
+
+
