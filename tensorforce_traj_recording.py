@@ -32,13 +32,15 @@ def main():
         scale_obs = False)
     env = gym.wrappers.FrameStack(env, num_stack = 4)
 
-    write_custom_recording_file(in_directory='trajectory06-13-2022,13-15.pkl', out_directory='pacman_traces', env=env)
+    write_custom_recording_file(in_directory='trajectory06-27-2022,13-17.pkl', out_directory='pacman_traces', env=env)
 
     # Pretrain a new agent on the recorded traces: for 30 iterations, feed the
     # experience of one episode to the agent and subsequently perform one update
-    environment = Environment.create(environment=env)
-    agent = Agent.create(agent='dqn', environment=env)
+    environment = Environment.create(environment='ALE/MsPacman-v5')
+    agent = Agent.create(agent='dqn', environment=environment, batch_size = 488, memory = 27000) 
+    print("Agent Created")
     agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=1, num_updates=1)
+    print("Agent pretrained")
 
     # # Evaluate the pretrained agent
     # runner = Runner(agent=agent, environment=environment)
