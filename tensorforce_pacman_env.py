@@ -4,7 +4,7 @@ import ale_py.roms as roms
 
 from tensorforce import Environment
 
-class tf_pacman_env(gym.Env, Environment):
+class tf_pacman_env(Environment):
     def __init__(self):
         env = gym.make("ALE/MsPacman-v5")
         env = gym.wrappers.AtariPreprocessing(
@@ -19,8 +19,20 @@ class tf_pacman_env(gym.Env, Environment):
         env = gym.wrappers.FrameStack(env, num_stack = 4)
         
         self.env = env
+        self.obs = self.env.reset()
         super().__init__()
 
-    # Required
+    # Required for Tensorforce
     def states(self):
-        return super().states()
+        return dict(type='float', shape=(4,84,84))
+
+    def actions(self):
+        return dict(type='int', num_values=18)
+
+    def reset(self):
+        return self.env.reset()
+
+    def execute(self, actions):
+        new_obs, reward, terminal, info = self.env.step(actions)
+        self.obs = new_obs
+        return new_obs, reward, terminal, info

@@ -7,6 +7,7 @@ from datetime import datetime
 from itertools import count
 from tensorforce import Environment, Agent
 from gym.utils import play
+from tensorforce_pacman_env import tf_pacman_env
 
 import ale_py.roms as roms
 import tensorflow as tf
@@ -36,8 +37,9 @@ def main():
 
     # Pretrain a new agent on the recorded traces: for 30 iterations, feed the
     # experience of one episode to the agent and subsequently perform one update
-    environment = Environment.create(environment=env)
-    agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 27000) 
+    environment = Environment.create(environment=tf_pacman_env)
+    print(environment.reset())
+    agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 100000) 
     print("Agent Created")
     agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=1, num_updates=1)
     print("Agent pretrained")
