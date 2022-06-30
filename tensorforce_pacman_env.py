@@ -1,4 +1,5 @@
 import gym
+import numpy as np
 
 import ale_py.roms as roms
 
@@ -19,7 +20,7 @@ class tf_pacman_env(Environment):
         env = gym.wrappers.FrameStack(env, num_stack = 4)
         
         self.env = env
-        self.obs = self.env.reset()
+        self.obs = np.array(self.env.reset())
         super().__init__()
 
     # Required for Tensorforce
@@ -34,5 +35,5 @@ class tf_pacman_env(Environment):
 
     def execute(self, actions):
         new_obs, reward, terminal, info = self.env.step(actions)
-        self.obs = new_obs
+        self.obs = np.array(new_obs)
         return new_obs, reward, terminal, info
