@@ -2,7 +2,9 @@ import gym
 
 import ale_py.roms as roms
 
-class tf_pacman_env(gym.Env):
+from tensorforce import Environment
+
+class tf_pacman_env(gym.Env, Environment):
     def __init__(self):
         env = gym.make("ALE/MsPacman-v5")
         env = gym.wrappers.AtariPreprocessing(
@@ -17,3 +19,8 @@ class tf_pacman_env(gym.Env):
         env = gym.wrappers.FrameStack(env, num_stack = 4)
         
         self.env = env
+        super().__init__()
+
+    # Required
+    def states(self):
+        return super().states()

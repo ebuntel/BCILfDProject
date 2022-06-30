@@ -36,8 +36,8 @@ def main():
 
     # Pretrain a new agent on the recorded traces: for 30 iterations, feed the
     # experience of one episode to the agent and subsequently perform one update
-    environment = Environment.create(environment='ALE/MsPacman-v5')
-    agent = Agent.create(agent='dqn', environment=environment, batch_size = 488, memory = 27000) 
+    environment = Environment.create(environment=env)
+    agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 27000) 
     print("Agent Created")
     agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=1, num_updates=1)
     print("Agent pretrained")
@@ -52,7 +52,6 @@ def main():
     environment.close()
 
 def write_custom_recording_file(in_directory, out_directory, env):
-    # Start recording traces after 80 episodes -- by then, the environment is solved
     environment = Environment.create(environment=env)
 
     with open(in_directory, "rb") as trajectoryfile:
@@ -66,15 +65,12 @@ def write_custom_recording_file(in_directory, out_directory, env):
 
     #print(actions)
 
-    # Record 20 episodes
-
     # Record episode experience
     episode_states = list()
     episode_actions = list()
     episode_terminal = list()
     episode_reward = list()
 
-    # Evaluation episode
     states = environment.reset()
     terminal = False
     while not terminal and len(actions) >= 1:
