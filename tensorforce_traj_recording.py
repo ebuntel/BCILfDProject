@@ -19,24 +19,22 @@ import numpy as np
 def main():
     #display = pyvirtualdisplay.Display(visible=1, size=(1400, 900)).start()
 
-    env_name = 'ALE/MsPacman-v5'
+    # env_name = 'ALE/MsPacman-v5'
 
-    env = gym.make(env_name)
-    env = gym.wrappers.AtariPreprocessing(
-        env,
-        noop_max = 30, 
-        frame_skip = 1, 
-        screen_size = 84, 
-        terminal_on_life_loss = False,
-        grayscale_obs = True, 
-        grayscale_newaxis = False, 
-        scale_obs = False)
-    env = gym.wrappers.FrameStack(env, num_stack = 4)
+    # env = gym.make(env_name)
+    # env = gym.wrappers.AtariPreprocessing(
+    #     env,
+    #     noop_max = 30, 
+    #     frame_skip = 1, 
+    #     screen_size = 84, 
+    #     terminal_on_life_loss = False,
+    #     grayscale_obs = True, 
+    #     grayscale_newaxis = False, 
+    #     scale_obs = False)
+    # env = gym.wrappers.FrameStack(env, num_stack = 4)
 
-    write_custom_recording_file(in_directory='trajectory06-27-2022,13-17.pkl', out_directory='pacman_traces', env=env)
+    #write_custom_recording_file(in_directory='trajectory06-27-2022,13-17.pkl', out_directory='pacman_traces', env=env)
 
-    # Pretrain a new agent on the recorded traces: for 30 iterations, feed the
-    # experience of one episode to the agent and subsequently perform one update
     environment = Environment.create(environment=tf_pacman_env)
     print(environment.reset())
     agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 100000) 
@@ -44,7 +42,6 @@ def main():
     agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=1, num_updates=1)
     print("Agent pretrained")
 
-    # # Evaluate the pretrained agent
     # runner = Runner(agent=agent, environment=environment)
     # runner.run(num_episodes=100, evaluation=True)
     # runner.close()
