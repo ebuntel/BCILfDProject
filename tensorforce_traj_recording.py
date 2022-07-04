@@ -1,7 +1,9 @@
+from tokenize import String
 import pyvirtualdisplay
 import gym
 import pickle
 import os
+import argparse
 
 from datetime import datetime
 from itertools import count
@@ -19,36 +21,55 @@ import numpy as np
 def main():
     #display = pyvirtualdisplay.Display(visible=1, size=(1400, 900)).start()
 
-    # env_name = 'ALE/MsPacman-v5'
+    arg_parser = argparse.ArgumentParser()
 
-    # env = gym.make(env_name)
-    # env = gym.wrappers.AtariPreprocessing(
-    #     env,
-    #     noop_max = 30, 
-    #     frame_skip = 1, 
-    #     screen_size = 84, 
-    #     terminal_on_life_loss = False,
-    #     grayscale_obs = True, 
-    #     grayscale_newaxis = False, 
-    #     scale_obs = False)
-    # env = gym.wrappers.FrameStack(env, num_stack = 4)
+    arg_parser.add_argument('--convert_trajectory', metavar='c', type=bool, \
+            help="a bool indicating whether to convert a trajectory to tensorforce format or not")
 
-    #write_custom_recording_file(in_directory='trajectory06-27-2022,13-17.pkl', out_directory='pacman_traces', env=env)
+    arg_parser.add_argument('--trajectory_in', metavar='i', type=str,
+            help="the path to a trajectory for converting")
 
-    environment = Environment.create(environment=tf_pacman_env)
-    print(environment.reset())
-    agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 100000) 
-    print("Agent Created")
-    agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=1, num_updates=1)
-    print("Agent pretrained")
+    arg_parser.add_argument('--pretrain', metavar='p', type=bool,
+            help="a bool indicating whether to pretrain a Tensorforce agent or not")
 
-    # runner = Runner(agent=agent, environment=environment)
-    # runner.run(num_episodes=100, evaluation=True)
-    # runner.close()
+    args = arg_parser.parse_args()
 
-    # # Close agent and environment
-    agent.close()
-    environment.close()
+    write_traj = args.convert_trajectory
+    write_in = args.trajectory_in
+    pretrain = args.pretrain
+
+    if(write_traj):
+        env_name = 'ALE/MsPacman-v5'
+
+        env = gym.make(env_name)
+        env = gym.wrappers.AtariPreprocessing(
+            env,
+            noop_max = 30, 
+            frame_skip = 1, 
+            screen_size = 84, 
+            terminal_on_life_loss = False,
+            grayscale_obs = True, 
+            grayscale_newaxis = False, 
+            scale_obs = False)
+        env = gym.wrappers.FrameStack(env, num_stack = 4)
+
+        write_custom_recording_file(in_directory=write_in, out_directory='pacman_traces', env=env)
+
+    if(pretrain):
+        environment = Environment.create(environment=tf_pacman_env)
+        print(environment.reset())
+        agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 100000) 
+        print("Agent Created")
+        agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=1, num_updates=1)
+        print("Agent pretrained")
+
+        # runner = Runner(agent=agent, environment=environment)
+        # runner.run(num_episodes=100, evaluation=True)
+        # runner.close()
+
+        # # Close agent and environment
+        agent.close()
+        environment.close()
 
 def write_custom_recording_file(in_directory, out_directory, env):
     environment = Environment.create(environment=env)
