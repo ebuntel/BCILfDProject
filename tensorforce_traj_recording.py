@@ -23,23 +23,24 @@ def main():
 
     arg_parser = argparse.ArgumentParser()
 
-    arg_parser.add_argument('--convert_trajectory', metavar='c', type=bool, \
+    arg_parser.add_argument('--convert_trajectory', metavar='c', type=bool, default=False,
             help="a bool indicating whether to convert a trajectory to tensorforce format or not")
 
     arg_parser.add_argument('--trajectory_in', metavar='i', type=str,
             help="the path to a trajectory for converting")
 
-    arg_parser.add_argument('--pretrain', metavar='p', type=bool,
+    arg_parser.add_argument('--pretrain', metavar='p', type=bool, default=False,
             help="a bool indicating whether to pretrain a Tensorforce agent or not")
 
     args = arg_parser.parse_args()
 
     write_traj = args.convert_trajectory
+
     write_in = args.trajectory_in
-    pretrain = False
+
     pretrain = args.pretrain
 
-    if(write_traj):
+    if(write_traj != False):
         env_name = 'ALE/MsPacman-v5'
 
         env = gym.make(env_name)
@@ -64,7 +65,7 @@ def main():
 
         environment = Environment.create(environment=tf_pacman_env)
         print(environment.reset())
-        agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 100000) 
+        agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 10000) 
         print("Agent Created")
         agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=trace_count, num_updates=1)
         print("Agent pretrained")
