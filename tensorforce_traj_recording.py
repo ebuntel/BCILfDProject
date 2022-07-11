@@ -36,6 +36,7 @@ def main():
 
     write_traj = args.convert_trajectory
     write_in = args.trajectory_in
+    pretrain = False
     pretrain = args.pretrain
 
     if(write_traj):
@@ -56,11 +57,16 @@ def main():
         write_custom_recording_file(in_directory=write_in, out_directory='pacman_traces', env=env)
 
     if(pretrain):
+
+        # Counts # of trace files in folder
+        _, _, files = next(os.walk("./pacman_traces"))
+        trace_count = len(files)
+
         environment = Environment.create(environment=tf_pacman_env)
         print(environment.reset())
         agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 100000) 
         print("Agent Created")
-        agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=1, num_updates=1)
+        agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=trace_count, num_updates=1)
         print("Agent pretrained")
 
         # runner = Runner(agent=agent, environment=environment)
@@ -109,8 +115,17 @@ def write_custom_recording_file(in_directory, out_directory, env):
     print("# of rewards: ", len(episode_reward))
 
     # Write recorded episode trace to npz file
+
+    # Counts # of trace files
+    _, _, files = next(os.walk("./pacman_traces"))
+    file_count = len(files)
+
+    #num = len([name for name in os.listdir('~/Research/RL/BCILfDProject/pacman_traces') if os.path.isfile(name)])
+
+    #print(num)
+
     np.savez_compressed(
-        file=os.path.join(out_directory, 'trace-{:09d}.npz'.format(1)),
+        file=os.path.join(out_directory, 'trace-{:09d}.npz'.format(file_count + 1)),
         states=np.stack(episode_states, axis=0),
         actions=np.stack(episode_actions, axis=0),
         terminal=np.stack(episode_terminal, axis=0),
