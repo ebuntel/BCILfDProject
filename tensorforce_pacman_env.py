@@ -34,6 +34,7 @@ class tf_pacman_env(Environment):
         return self.env.reset()
 
     def execute(self, actions):
-        new_obs, reward, terminal, info = self.env.step(actions)
+        new_obs, reward, done = self.env.step(actions)
         self.obs = np.array(new_obs)
-        return new_obs, reward, terminal, info
+        super().execute(actions)
+        return new_obs, terminated, reward

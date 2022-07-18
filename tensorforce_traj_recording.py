@@ -65,7 +65,7 @@ def main():
 
         environment = Environment.create(environment=tf_pacman_env)
         print(environment.reset())
-        agent = Agent.create(agent='dqn', environment=environment, batch_size = 1, memory = 10000) 
+        agent = Agent.create(agent='ddqn', environment=environment, batch_size = 1, memory = 15000) 
         print("Agent Created")
         agent.pretrain(directory='pacman_traces', num_iterations=30, num_traces=trace_count, num_updates=1)
         print("Agent pretrained")
