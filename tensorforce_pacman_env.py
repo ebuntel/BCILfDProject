@@ -21,7 +21,11 @@ class tf_pacman_env(Environment):
         
         self.env = env
         self.obs = np.array(self.env.reset())
+        self._expect_receive = None
         super().__init__()
+
+    def action_set_thing(self):
+        return super()._action_set
 
     # Required for Tensorforce
     def states(self):
@@ -31,9 +35,12 @@ class tf_pacman_env(Environment):
         return dict(type='int', num_values=18)
 
     def reset(self):
-        return self.env.reset()
+        self.obs = self.env.reset()
+        return self.obs
 
     def execute(self, actions):
         new_obs, reward, terminal, info = self.env.step(actions)
         self.obs = np.array(new_obs)
-        return new_obs, reward, terminal, info
+        self._expect_receive = None
+        self._actions = None
+        return new_obs, terminal, reward
