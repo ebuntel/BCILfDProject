@@ -18,14 +18,17 @@ class tf_pacman_env(Environment):
             grayscale_newaxis = False, 
             scale_obs = False)
         env = gym.wrappers.FrameStack(env, num_stack = 4)
-        
+        env._max_episode_steps = 50 
+
         self.env = env
         self.obs = np.array(self.env.reset())
         self._expect_receive = None
+        self.reward_list = []
+        self.episode_reward_list = []
         super().__init__()
 
-    def action_set_thing(self):
-        return super()._action_set
+    def max_episode_timesteps(self):
+        return self.env._max_episode_steps
 
     # Required for Tensorforce
     def states(self):
@@ -35,11 +38,20 @@ class tf_pacman_env(Environment):
         return dict(type='int', num_values=18)
 
     def reset(self):
-        self.obs = self.env.reset()
-        return self.obs
+        self.obs = np.array(self.env.reset())
+
+        rew_sum = np.sum(self.reward_list)
+
+        if(rew_sum != 0):
+            self.episode_reward_list.append(rew_sum)
+        self.reward_list = []
+        return np.array(self.obs)
 
     def execute(self, actions):
-        new_obs, reward, terminal = self.env.step(actions)
+        new_obs, reward, terminal, __ = self.env.step(actions)
+
+        self.reward_list.append(reward)
+
         self.obs = np.array(new_obs)
         self._expect_receive = None
         self._actions = None

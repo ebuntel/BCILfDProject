@@ -1,5 +1,5 @@
 /.ipynb_checkpoints/
 /trajectory*.pkl
-/.gitignore
 /TrajectoryLoading.ipynb
 /__pycache__/*
+/*.png
