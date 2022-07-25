@@ -18,7 +18,7 @@ class tf_pacman_env(Environment):
             grayscale_newaxis = False, 
             scale_obs = False)
         env = gym.wrappers.FrameStack(env, num_stack = 4)
-        env._max_episode_steps = 50 
+        env._max_episode_steps = None 
 
         self.env = env
         self.obs = np.array(self.env.reset())
@@ -28,7 +28,10 @@ class tf_pacman_env(Environment):
         super().__init__()
 
     def max_episode_timesteps(self):
-        return self.env._max_episode_steps
+      return self.env._max_episode_steps
+
+    def set_max_episode_timesteps(self, stepnum):
+        self.env._max_episode_steps = stepnum
 
     # Required for Tensorforce
     def states(self):
